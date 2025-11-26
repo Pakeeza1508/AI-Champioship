@@ -231,8 +231,8 @@
 					</svg>
 				</div>
 				<div class="brand-text">
-					<h1>AEROCRAFT</h1>
-					<span class="brand-subtitle">CAD SYSTEM v2.1</span>
+					<h1>FUTURECRAFT</h1>
+					<span class="brand-subtitle">AI BASED CAD SYSTEM</span>
 				</div>
 			</div>
 

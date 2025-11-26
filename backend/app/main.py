@@ -54,7 +54,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 async def root():
     """Root endpoint"""
     return {
-        "message": "AeroCraft API",
+        "message": "FutureCraft API",
         "version": "0.1.0",
         "docs": "/docs"
     }
