@@ -18,6 +18,8 @@
 	import { missionProfile } from '$lib/stores/aircraftStore';
 	import { calculateAtmosphere, mpsToKmph } from '$lib/utils/physics';
 
+	import { MATERIALS } from '$lib/data/materials';
+	import { componentMaterials } from '$lib/stores/aircraftStore';
 	// Local UI state for transient toasts
 	let showContextToast = false;
 	let contextToastText = '';
@@ -71,6 +73,52 @@
 			alert('Error compiling aircraft');
 		} finally {
 			isCompiling.set(false);
+		}
+	}
+
+	// Simulation State
+	let isSimulating = false;
+	let simResult: any = null;
+
+	async function handleSimulation() {
+		// We need wings to run a wing stress test
+		if (!$aircraft.wings.model) {
+			alert("Please generate wings first.");
+			return;
+		}
+
+		isSimulating = true;
+		simResult = null;
+
+		try {
+			// Get Wing Parameters
+			const wingParams = $aircraft.wings.model.parameters;
+			
+			// Get Current Wing Material
+			const matId = $componentMaterials.wings;
+			const material = MATERIALS.find(m => m.id === matId) || MATERIALS[0];
+
+			// Call API
+			const result = await apiService.runSimulation({
+				materialYield: material.yieldStrength,
+				materialDensity: material.density,
+				altitude: $missionProfile.altitude,
+				speed: $missionProfile.speed,
+				span: wingParams.span,
+				rootChord: wingParams.rootChord,
+				thickness: wingParams.thickness
+			});
+
+			if (result.success) {
+				simResult = result;
+			} else {
+				alert("Simulation failed: " + result.error);
+			}
+		} catch (e) {
+			console.error(e);
+			alert("Simulation error");
+		} finally {
+			isSimulating = false;
 		}
 	}
 
@@ -346,6 +394,68 @@
 							<p class="compile-hint">Complete all modules to enable compilation</p>
 						{:else if $compiledAircraft}
 							<p class="compile-success">Aircraft compiled successfully</p>
+						{/if}
+					</div>
+
+					<!-- STRUCTURAL SIMULATION SECTION -->
+					<div class="compile-section" style="margin-bottom: var(--space-6); border-color: var(--cyan-600);">
+						<div class="compile-header">
+							<svg viewBox="0 0 24 24" fill="none">
+								<path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+							</svg>
+							<span>STRUCTURAL VALIDATION</span>
+						</div>
+
+						{#if !simResult}
+							<div class="sim-intro">
+								Validate structural integrity based on selected materials and mission profile.
+							</div>
+							<button 
+								class="compile-btn"
+								class:compiling={isSimulating}
+								on:click={handleSimulation}
+								disabled={isSimulating || !$allComponentsComplete}
+							>
+								{#if isSimulating}
+									<div class="spinner"></div>
+									<span>RUNNING SOLVER...</span>
+								{:else}
+									<span>RUN STRESS ANALYSIS</span>
+								{/if}
+							</button>
+						{:else}
+							<!-- RESULTS DISPLAY -->
+							<div class="sim-results">
+								<div class="sim-status {simResult.status === 'PASS' ? 'pass' : 'fail'}">
+									<span class="status-icon">{simResult.status === 'PASS' ? '✓' : '⚠'}</span>
+									<span class="status-text">DESIGN {simResult.status}ED</span>
+								</div>
+								
+								<div class="sim-grid">
+									<div class="sim-item">
+										<span class="label">SAFETY FACTOR</span>
+										<span class="value {simResult.safety_factor < 1.5 ? 'danger' : 'good'}">
+											{simResult.safety_factor}x
+										</span>
+									</div>
+									<div class="sim-item">
+										<span class="label">MAX STRESS</span>
+										<span class="value">{simResult.max_stress} <span class="unit">MPa</span></span>
+									</div>
+									<div class="sim-item">
+										<span class="label">LIFT LOAD</span>
+										<span class="value">{simResult.lift_force_kn} <span class="unit">kN</span></span>
+									</div>
+									<div class="sim-item">
+										<span class="label">DYNAMIC PRES.</span>
+										<span class="value">{simResult.details.dynamic_pressure} <span class="unit">Pa</span></span>
+									</div>
+								</div>
+								
+								<button class="reset-btn" on:click={() => simResult = null}>
+									RUN NEW SIMULATION
+								</button>
+							</div>
 						{/if}
 					</div>
 
@@ -1410,5 +1520,95 @@
 
 	.toast-content {
 		font-size: 0.95rem;
+	}
+
+	/* Simulation Styles */
+	.sim-intro {
+		font-size: 0.75rem;
+		color: var(--gray-400);
+		margin-bottom: var(--space-3);
+		font-style: italic;
+	}
+
+	.sim-results {
+		background: var(--blueprint-bg);
+		padding: var(--space-3);
+		border: 1px solid var(--border-technical);
+		margin-top: var(--space-2);
+	}
+
+	.sim-status {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+		font-weight: 800;
+		font-size: 1rem;
+		padding-bottom: var(--space-3);
+		border-bottom: 1px solid var(--border-subtle);
+		margin-bottom: var(--space-3);
+		letter-spacing: 0.05em;
+	}
+
+	.sim-status.pass { 
+		color: var(--green-success); 
+		text-shadow: 0 0 15px rgba(102, 187, 106, 0.4);
+	}
+	.sim-status.fail { 
+		color: var(--red-error); 
+		text-shadow: 0 0 15px rgba(239, 83, 80, 0.4);
+	}
+
+	.sim-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: var(--space-4);
+		margin-bottom: var(--space-4);
+	}
+
+	.sim-item {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+
+	.sim-item .label {
+		font-size: 0.55rem;
+		color: var(--gray-500);
+		font-weight: 700;
+		letter-spacing: 0.05em;
+	}
+
+	.sim-item .value {
+		font-family: var(--font-technical);
+		font-size: 1rem;
+		color: var(--cyan-300);
+	}
+
+	.sim-item .value.danger { color: var(--red-error); }
+	.sim-item .value.good { color: var(--green-success); }
+
+	.sim-item .unit {
+		font-size: 0.6rem;
+		color: var(--gray-500);
+	}
+
+	.reset-btn {
+		width: 100%;
+		padding: var(--space-2);
+		background: rgba(255, 255, 255, 0.05);
+		border: 1px solid var(--border-subtle);
+		color: var(--gray-400);
+		font-size: 0.65rem;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 0.2s;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+	}
+	
+	.reset-btn:hover { 
+		background: var(--blueprint-surface); 
+		color: var(--gray-100);
+		border-color: var(--gray-500);
 	}
 </style>

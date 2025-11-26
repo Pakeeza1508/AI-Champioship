@@ -235,6 +235,41 @@ class ApiService {
 		}
 	}
 
+	async runSimulation(data: {
+        materialYield: number;
+        materialDensity: number;
+        altitude: number;
+        speed: number;
+        span: number;
+        rootChord: number;
+        thickness: number;
+    }) {
+        try {
+            const response = await fetch(`${API_BASE}/simulate/structural`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    material_yield: data.materialYield,
+                    material_density: data.materialDensity,
+                    altitude: data.altitude,
+                    speed: data.speed,
+                    span: data.span,
+                    root_chord: data.rootChord,
+                    thickness: data.thickness
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Simulation failed: ${response.status}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Simulation error:', error);
+            return { success: false, error: 'Simulation failed' };
+        }
+    }
+
 	async editComponent(prompt: string, aircraft: any): Promise<{
 		success: boolean;
 		component?: string;

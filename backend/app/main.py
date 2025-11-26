@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 from fastapi import Request
 import traceback
 from app.core import settings
-from app.api import generation_router, export_router, images_router
+from app.api import generation_router, export_router, images_router, simulation_router # <--- ADD IMPORT
 
 # Create FastAPI app
 app = FastAPI(
@@ -27,7 +27,7 @@ app.add_middleware(
 app.include_router(generation_router, prefix="/api")
 app.include_router(export_router, prefix="/api")
 app.include_router(images_router, prefix="/api")
-
+app.include_router(simulation_router, prefix="/api") # <--- ADD LINE
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
