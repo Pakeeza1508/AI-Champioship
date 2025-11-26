@@ -1,4 +1,5 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
+from pydantic import ValidationError
 from app.models import GenerateRequest, UpdateParametersRequest, GenerateResponse
 from app.services import ai_service, geometry_service
 import time
@@ -50,14 +51,24 @@ async def generate_from_text(request: GenerateRequest):
 
 
 @router.post("/update-parameters", response_model=GenerateResponse)
-async def update_parameters(request: UpdateParametersRequest):
+async def update_parameters(req: Request):
     """
     Update current model with new parameters.
     """
     try:
+        # Read raw JSON and validate manually so we can log validation errors
+        body = await req.json()
+        try:
+            parsed = UpdateParametersRequest.parse_obj(body)
+        except ValidationError as ve:
+            # Log the invalid payload and validation errors for debugging
+            print("[GENERATION] Validation error in update-parameters:\n", ve)
+            print("[GENERATION] Request body:\n", body)
+            return GenerateResponse(success=False, error=f"Validation error: {ve}")
+
         # Generate new model with updated parameters
         model = geometry_service.create_model_from_parameters(
-            params=request.parameters,
+            params=parsed.parameters,
             source_prompt=None,
             generated_from="manual"
         )
@@ -69,7 +80,7 @@ async def update_parameters(request: UpdateParametersRequest):
         return GenerateResponse(
             success=True,
             model=model,
-            parameters=request.parameters
+            parameters=parsed.parameters
         )
 
     except Exception as e:

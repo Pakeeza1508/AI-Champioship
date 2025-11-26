@@ -119,7 +119,6 @@ async def export_step(req: Request):
 
     try:
         step_data = export_service.export_step(model_to_use, options)
-
         return Response(
             content=step_data,
             media_type="application/step",
@@ -129,7 +128,20 @@ async def export_step(req: Request):
         )
 
     except NotImplementedError as e:
-        raise HTTPException(status_code=501, detail=str(e))
+        # STEP export not implemented on this platform. Fall back to OBJ export
+        try:
+            print(f"[EXPORT STEP] STEP not implemented, falling back to OBJ: {e}")
+            obj_bytes = export_service.export_obj(model_to_use)
+            return Response(
+                content=obj_bytes,
+                media_type="text/plain",
+                headers={
+                    "Content-Disposition": f"attachment; filename={model_to_use.name}.obj",
+                    "X-Export-Fallback": "obj"
+                }
+            )
+        except Exception as e2:
+            raise HTTPException(status_code=501, detail=f"STEP export not implemented and OBJ fallback failed: {e2}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -164,7 +176,6 @@ async def export_iges(req: Request):
 
     try:
         iges_data = export_service.export_iges(model_to_use, options)
-
         return Response(
             content=iges_data,
             media_type="application/iges",
@@ -174,6 +185,19 @@ async def export_iges(req: Request):
         )
 
     except NotImplementedError as e:
-        raise HTTPException(status_code=501, detail=str(e))
+        # IGES not implemented - fall back to OBJ for usability
+        try:
+            print(f"[EXPORT IGES] IGES not implemented, falling back to OBJ: {e}")
+            obj_bytes = export_service.export_obj(model_to_use)
+            return Response(
+                content=obj_bytes,
+                media_type="text/plain",
+                headers={
+                    "Content-Disposition": f"attachment; filename={model_to_use.name}.obj",
+                    "X-Export-Fallback": "obj"
+                }
+            )
+        except Exception as e2:
+            raise HTTPException(status_code=501, detail=f"IGES export not implemented and OBJ fallback failed: {e2}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

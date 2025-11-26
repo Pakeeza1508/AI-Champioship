@@ -1,5 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from fastapi import Request
+import traceback
 from app.core import settings
 from app.api import generation_router, export_router, images_router
 
@@ -23,6 +27,27 @@ app.add_middleware(
 app.include_router(generation_router, prefix="/api")
 app.include_router(export_router, prefix="/api")
 app.include_router(images_router, prefix="/api")
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    # Read body safely for debugging (development only). Avoid logging full bodies in production.
+    try:
+        body_bytes = await request.body()
+        body_text = body_bytes.decode('utf-8', errors='replace')
+    except Exception:
+        body_text = '<could not read body>'
+
+    print(f"[VALIDATION] RequestValidationError path={request.url.path}")
+    print(f"[VALIDATION] Body preview: {body_text[:200]}")
+    print(f"[VALIDATION] Errors: {exc.errors()}")
+    traceback.print_exc()
+
+    # Return JSON with details but don't expose everything in production
+    return JSONResponse(
+        status_code=422,
+        content={"detail": exc.errors(), "body_preview": body_text[:200]}
+    )
 
 
 @app.get("/")

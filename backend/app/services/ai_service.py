@@ -1,4 +1,5 @@
 import json
+import sys
 # NOTE: Groq client is synchronous; add timing logs around network calls to diagnose slowness
 from groq import Groq
 import time

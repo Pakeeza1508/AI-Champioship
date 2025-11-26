@@ -165,11 +165,32 @@
 
 	async function generateComponent(componentType: string, parameters: any) {
 		try {
-			// Parameters from chat endpoint are already in snake_case, send directly
+			// Parameters from chat endpoint are already in snake_case, but may contain nulls
+			// Sanitize/coerce fields to match backend `AeroParameters` expectations to avoid 422
+			const sanitized = {
+				wing_type: parameters.wing_type || 'straight',
+				span: Number(parameters.span) || 1.0,
+				root_chord: Number(parameters.root_chord) || 1.0,
+				tip_chord: (parameters.tip_chord != null) ? Number(parameters.tip_chord) : (Number(parameters.root_chord) || 1.0),
+				sweep_angle: Number(parameters.sweep_angle) || 0,
+				thickness: Number(parameters.thickness) || 12,
+				dihedral: Number(parameters.dihedral) || 0,
+				fuselage_type: parameters.fuselage_type ?? null,
+				fuselage_length: parameters.fuselage_length != null ? Number(parameters.fuselage_length) : null,
+				fuselage_diameter: parameters.fuselage_diameter != null ? Number(parameters.fuselage_diameter) : null,
+				engine_length: parameters.engine_length != null ? Number(parameters.engine_length) : null,
+				engine_diameter: parameters.engine_diameter != null ? Number(parameters.engine_diameter) : null,
+				has_vertical_stabilizer: !!parameters.has_vertical_stabilizer,
+				has_horizontal_stabilizer: !!parameters.has_horizontal_stabilizer,
+				position_x: parameters.position_x != null ? Number(parameters.position_x) : 0,
+				position_y: parameters.position_y != null ? Number(parameters.position_y) : 0,
+				position_z: parameters.position_z != null ? Number(parameters.position_z) : 0
+			};
+
 			const response = await fetch('/api/generate/update-parameters', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ parameters })
+				body: JSON.stringify({ parameters: sanitized })
 			});
 
 			const data = await response.json();
