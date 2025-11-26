@@ -84,20 +84,6 @@ npm run dev
 5. **Open browser**
 Navigate to `http://localhost:5173`
 
-## API Endpoints
-
-### Generation
-- `POST /api/generate/from-text` - Generate 3D model from text description
-- `POST /api/generate/update-parameters` - Update model with new parameters
-
-### Export
-- `POST /api/export/stl` - Export model as STL
-- `POST /api/export/step` - Export model as STEP
-- `POST /api/export/iges` - Export model as IGES
-
-### Images
-- `POST /api/images/upload` - Upload reference image
-- `GET /api/images/{id}` - Retrieve reference image
 
 ## Architecture
 
