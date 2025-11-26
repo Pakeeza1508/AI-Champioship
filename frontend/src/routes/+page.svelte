@@ -15,9 +15,8 @@
 		type ComponentType
 	} from '$lib/stores/aircraftStore';
 	import { apiService } from '$lib/services/apiService';
-	 // ... existing imports ...
-    import { missionProfile } from '$lib/stores/aircraftStore';
-    import { calculateAtmosphere, mpsToKmph } from '$lib/utils/physics';
+	import { missionProfile } from '$lib/stores/aircraftStore';
+	import { calculateAtmosphere, mpsToKmph } from '$lib/utils/physics';
 
 	// Local UI state for transient toasts
 	let showContextToast = false;
@@ -74,22 +73,22 @@
 			isCompiling.set(false);
 		}
 	}
-	 // Physics Calculations
-    $: atmosphere = calculateAtmosphere($missionProfile.altitude);
-    $: machNumber = $missionProfile.speed / atmosphere.speedOfSound;
-    $: speedKmph = mpsToKmph($missionProfile.speed);
+
+	// Physics Calculations
+	$: atmosphere = calculateAtmosphere($missionProfile.altitude);
+	$: machNumber = $missionProfile.speed / atmosphere.speedOfSound;
+	$: speedKmph = mpsToKmph($missionProfile.speed);
     
-    function applyContext() {
-        $missionProfile.isContextApplied = true;
-        // This effectively "Saves" the context for the Step 3 validation
-	    // Show a short in-app success toast instead of native alert
-	    contextToastText = `Mission Profile Applied — ${atmosphere.zone}, Mach ${machNumber.toFixed(2)}`;
-	    showContextToast = true;
-	    // Hide after 2.5s
-	    setTimeout(() => {
+	function applyContext() {
+		$missionProfile.isContextApplied = true;
+		// Show a short in-app success toast
+		contextToastText = `Mission Profile Applied — ${atmosphere.zone}, Mach ${machNumber.toFixed(2)}`;
+		showContextToast = true;
+		// Hide after 2.5s
+		setTimeout(() => {
 			showContextToast = false;
 		}, 2500);
-    }
+	}
 </script>
 
 <main class="app-container">
@@ -186,94 +185,104 @@
 				</div>
 
 				<div class="panel-content">
-					 <!-- NEW: Mission Profile Section (Insert before or after Assembly Tree) -->
-                    <div class="compile-section" style="margin-bottom: var(--space-6);">
-                        <div class="compile-header">
-                            <svg viewBox="0 0 24 24" fill="none">
-                                <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="1.5"/>
-                                <path d="M2 12H22" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2 2"/>
-                                <path d="M12 2V22" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2 2"/>
-                            </svg>
-                            <span>MISSION PROFILE</span>
-                        </div>
-
-						<div class="mission-card">
-							<div class="mission-card-header">
-								<div class="mission-title">Mission Profile</div>
-								<div class="mission-sub">Altitude & Performance</div>
-							</div>
-
-							<div class="mission-body">
-								<!-- Altitude -->
-								<div class="param-row">
-									<div class="param-left">
-										<div class="param-label">Altitude</div>
-										<div class="param-value">
-											<span class="value-large">{$missionProfile.altitude.toLocaleString()}</span>
-											<span class="value-unit">m</span>
-										</div>
-									</div>
-									<div class="param-right">
-										<input
-											type="range"
-											min="500"
-											max="25000"
-											step="500"
-											bind:value={$missionProfile.altitude}
-											class="param-slider"
-											aria-label="Altitude"
-										/>
-										<div class="slider-marks small">
-											<span>SL</span>
-											<span>12 km</span>
-											<span>25 km</span>
-										</div>
-										<div class="context-badge">{atmosphere.zone}</div>
-									</div>
-								</div>
-
-								<!-- Speed -->
-								<div class="param-row" style="margin-top: var(--space-4);">
-									<div class="param-left">
-										<div class="param-label">Design Speed</div>
-										<div class="param-value">
-											<span class="value-large">Mach {machNumber.toFixed(2)}</span>
-											<span class="value-unit">&nbsp;</span>
-										</div>
-									</div>
-									<div class="param-right">
-										<input
-											type="range"
-											min="50"
-											max="1000"
-											step="10"
-											bind:value={$missionProfile.speed}
-											class="param-slider"
-											aria-label="Design Speed"
-										/>
-										<div class="slider-marks small">
-											<span>50 m/s</span>
-											<span>1000 m/s</span>
-										</div>
-										<div class="speed-details">
-											<span class="muted">{Math.round($missionProfile.speed)} m/s</span>
-											<span class="sep">•</span>
-											<span class="muted">{speedKmph.toFixed(0)} km/h</span>
-										</div>
-									</div>
-								</div>
-							</div>
-
-							<div class="mission-card-footer">
-								<button class="apply-btn" on:click={applyContext} aria-label="Apply mission context">
-									<svg viewBox="0 0 16 16" fill="none" aria-hidden>
-										<path d="M3 8L7 12L13 4" stroke="currentColor" stroke-width="2"/>
-									</svg>
-									<span>Apply</span>
-								</button>
-							</div>
+					<!-- MISSION PROFILE SECTION (Improved UI) -->
+					<div class="compile-section" style="margin-bottom: var(--space-6);">
+						<div class="compile-header">
+							<svg viewBox="0 0 24 24" fill="none">
+								<path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="1.5"/>
+								<path d="M2 12H22" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2 2"/>
+								<path d="M12 2V22" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2 2"/>
+							</svg>
+							<span>MISSION PROFILE</span>
 						</div>
-                    </div>
+
+						<div class="mission-controls">
+							<!-- Altitude Control -->
+							<div class="mission-group">
+								<div class="control-header">
+									<label>ALTITUDE</label>
+									<div class="live-value">
+										{$missionProfile.altitude.toLocaleString()} <span class="unit">m</span>
+									</div>
+								</div>
+								
+								<div class="slider-container">
+									<input 
+										type="range" 
+										min="500" 
+										max="25000" 
+										step="500"
+										bind:value={$missionProfile.altitude}
+										class="tech-slider"
+									/>
+									<div class="slider-scale">
+										<span>SL</span>
+										<span>12km</span>
+										<span>25km</span>
+									</div>
+								</div>
+								
+								<div class="info-badge">
+									<span class="badge-label">ZONE</span>
+									<span class="badge-value">{atmosphere.zone}</span>
+								</div>
+							</div>
+
+							<div class="divider-line"></div>
+
+							<!-- Speed Control -->
+							<div class="mission-group">
+								<div class="control-header">
+									<label>DESIGN SPEED</label>
+									<div class="live-value">
+										MACH {machNumber.toFixed(2)}
+									</div>
+								</div>
+
+								<div class="slider-container">
+									<input 
+										type="range" 
+										min="50" 
+										max="1000" 
+										step="10"
+										bind:value={$missionProfile.speed}
+										class="tech-slider"
+									/>
+									<div class="slider-scale">
+										<span>50 m/s</span>
+										<span>1000 m/s</span>
+									</div>
+								</div>
+
+								<div class="telemetry-row">
+									<div class="telemetry-item">
+										<span class="t-label">VELOCITY</span>
+										<span class="t-val">{$missionProfile.speed} m/s</span>
+									</div>
+									<div class="telemetry-item right">
+										<span class="t-label">CONVERTED</span>
+										<span class="t-val">{speedKmph.toFixed(0)} km/h</span>
+									</div>
+								</div>
+							</div>
+
+							<!-- The Context Button -->
+							<button class="context-btn" on:click={applyContext} class:applied={$missionProfile.isContextApplied}>
+								{#if $missionProfile.isContextApplied}
+									<svg viewBox="0 0 24 24" fill="none" class="btn-icon">
+										<path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+									</svg>
+									<span>CONTEXT LOCKED</span>
+								{:else}
+									<svg viewBox="0 0 24 24" fill="none" class="btn-icon">
+										<path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" stroke="currentColor" stroke-width="1.5"/>
+										<path d="M12 8v8m-4-4h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+									</svg>
+									<span>APPLY CONTEXT</span>
+								{/if}
+							</button>
+						</div>
+					</div>
                     
 					<!-- Component Tree -->
 					<div class="assembly-tree">
@@ -400,12 +409,12 @@
 		</section>
 	</div>
 
-		<!-- Transient toast for context actions -->
-		{#if showContextToast}
-			<div class="toast toast-success" role="status" aria-live="polite">
-				<div class="toast-content">{contextToastText}</div>
-			</div>
-		{/if}
+	<!-- Transient toast for context actions -->
+	{#if showContextToast}
+		<div class="toast toast-success" role="status" aria-live="polite">
+			<div class="toast-content">{contextToastText}</div>
+		</div>
+	{/if}
 
 	<!-- Bottom: Component Module Selector -->
 	<nav class="module-selector">
@@ -1197,188 +1206,186 @@
 	.module-tab.generating {
 		color: var(--amber-warning);
 	}
-	/* Add to existing styles */
 
-	.mission-card {
-		background: var(--blueprint-surface);
-		border: 1px solid var(--border-technical);
-		padding: var(--space-4);
-		border-radius: 10px;
+	/* Mission Profile Styling (Improved) */
+	.mission-controls {
 		display: flex;
 		flex-direction: column;
-		gap: var(--space-3);
-		box-shadow: 0 8px 24px rgba(2,6,23,0.06);
-	}
-
-	.mission-card-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: baseline;
-		gap: var(--space-3);
-	}
-
-	.mission-title {
-		font-size: 0.875rem;
-		font-weight: 800;
-		letter-spacing: 0.02em;
-		color: var(--gray-100);
-	}
-
-	.mission-sub {
-		font-size: 0.6875rem;
-		color: var(--gray-400);
-	}
-
-	.mission-body {
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-3);
-	}
-
-	.param-row {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
 		gap: var(--space-4);
-		align-items: center;
 	}
 
-	.param-left {
-		display: flex;
-		flex-direction: column;
-		gap: 6px;
-	}
-
-	.param-label {
-		font-size: 0.6875rem;
-		font-weight: 700;
-		color: var(--gray-400);
-	}
-
-	.param-value {
-		display: flex;
-		align-items: baseline;
-		gap: 8px;
-	}
-
-	.value-large {
-		font-family: var(--font-technical);
-		font-size: 1.05rem;
-		font-weight: 700;
-		color: var(--gray-100);
-	}
-
-	.value-unit {
-		font-size: 0.75rem;
-		color: var(--gray-500);
-	}
-
-	.param-right {
+	.mission-group {
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-2);
 	}
 
-	.param-slider {
+	/* Labels & Values */
+	.control-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-end;
+	}
+
+	.control-header label {
+		font-size: 0.625rem;
+		font-weight: 700;
+		color: var(--gray-400);
+		letter-spacing: 0.1em;
+	}
+
+	.live-value {
+		font-family: var(--font-technical);
+		font-size: 0.875rem;
+		color: var(--cyan-400);
+		font-weight: 600;
+	}
+
+	.live-value .unit {
+		font-size: 0.625rem;
+		color: var(--gray-500);
+	}
+
+	/* Technical Slider */
+	.slider-container {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+
+	.tech-slider {
+		-webkit-appearance: none;
 		width: 100%;
-		appearance: none;
-		height: 8px;
-		background: linear-gradient(90deg, rgba(3,169,244,0.12), rgba(3,169,244,0.06));
-		border-radius: 999px;
+		height: 4px;
+		background: var(--blueprint-bg-secondary);
+		border: 1px solid var(--gray-700);
+		border-radius: 0;
 		outline: none;
 	}
 
-	.param-slider::-webkit-slider-thumb {
+	.tech-slider::-webkit-slider-thumb {
 		-webkit-appearance: none;
-		width: 16px;
-		height: 16px;
-		border-radius: 50%;
-		background: var(--cyan-400);
-		box-shadow: 0 4px 12px rgba(3,169,244,0.16);
-		border: 2px solid rgba(255,255,255,0.06);
+		width: 12px;
+		height: 12px;
+		background: var(--cyan-500);
+		border: 1px solid white;
+		cursor: pointer;
+		box-shadow: 0 0 10px var(--cyan-glow);
+	}
+
+	.tech-slider::-moz-range-thumb {
+		width: 12px;
+		height: 12px;
+		background: var(--cyan-500);
+		border: 1px solid white;
 		cursor: pointer;
 	}
 
-	.slider-marks.small {
+	.slider-scale {
 		display: flex;
 		justify-content: space-between;
-		font-size: 0.625rem;
+		font-family: var(--font-technical);
+		font-size: 0.5rem;
+		color: var(--gray-600);
+	}
+
+	/* Badges & Info */
+	.info-badge {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+		background: rgba(3, 169, 244, 0.05);
+		border: 1px solid var(--border-technical);
+		padding: 4px 8px;
+		margin-top: 4px;
+	}
+
+	.badge-label {
+		font-size: 0.5rem;
+		color: var(--gray-500);
+		font-weight: 700;
+	}
+
+	.badge-value {
+		font-family: var(--font-technical);
+		font-size: 0.6875rem;
+		color: var(--cyan-300);
+	}
+
+	/* Divider */
+	.divider-line {
+		height: 1px;
+		background: var(--border-subtle);
+		width: 100%;
+	}
+
+	/* Telemetry Row */
+	.telemetry-row {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: var(--space-2);
+		margin-top: 4px;
+	}
+
+	.telemetry-item {
+		display: flex;
+		flex-direction: column;
+	}
+	
+	.telemetry-item.right {
+		text-align: right;
+	}
+
+	.t-label {
+		font-size: 0.5rem;
 		color: var(--gray-500);
 	}
 
-	.context-badge {
+	.t-val {
 		font-family: var(--font-technical);
-		font-size: 0.625rem;
-		color: var(--cyan-400);
-		background: rgba(3, 169, 244, 0.06);
-		padding: 4px 8px;
-		border-radius: 999px;
-		display: inline-block;
-		border: 1px solid rgba(3,169,244,0.08);
-		justify-self: end;
-	}
-
-	.speed-details {
-		font-family: var(--font-technical);
-		font-size: 0.6875rem;
-		color: var(--gray-400);
-		margin-top: var(--space-1);
-		display: flex;
-		gap: var(--space-2);
-		align-items: center;
-		justify-self: end;
-	}
-
-	.context-btn, .apply-btn {
-		margin-top: var(--space-3);
-		width: 100%;
-		padding: calc(var(--space-2) - 2px) var(--space-3);
-		background: linear-gradient(90deg, var(--cyan-600), var(--cyan-400));
-		border: none;
-		color: white;
 		font-size: 0.75rem;
-		font-weight: 800;
-		letter-spacing: 0.05em;
+		color: var(--gray-300);
+	}
+
+	/* The Context Button - Completely Redesigned */
+	.context-btn {
+		margin-top: var(--space-2);
+		width: 100%;
+		padding: 10px;
+		background: transparent;
+		border: 1px solid var(--cyan-500);
+		color: var(--cyan-400);
+		font-size: 0.75rem;
+		font-weight: 700;
+		letter-spacing: 0.1em;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		gap: var(--space-2);
-		border-radius: 8px;
-		transition: transform 0.12s ease, box-shadow 0.12s ease;
-		box-shadow: 0 8px 20px rgba(3,169,244,0.08);
-	}
-
-	.context-btn svg {
-		width: 14px;
-		height: 14px;
-		opacity: 0.95;
+		transition: all 0.2s ease;
+		cursor: pointer;
+		text-transform: uppercase;
 	}
 
 	.context-btn:hover {
-		transform: translateY(-2px);
-		box-shadow: 0 14px 30px rgba(3,169,244,0.12);
+		background: rgba(3, 169, 244, 0.1);
+		box-shadow: 0 0 15px var(--cyan-glow);
+		transform: translateY(-1px);
 	}
 
-	/* Compact style for the Apply button (short & simple) */
-	.apply-btn {
-		width: auto;
-		padding: 6px 10px;
-		background: var(--cyan-600);
-		box-shadow: none;
-		border-radius: 6px;
-		font-size: 0.75rem;
-		font-weight: 800;
-		color: white;
-		display: inline-flex;
-		align-items: center;
-		gap: 8px;
-		justify-content: center;
-		align-self: flex-start;
-		min-width: 72px;
+	.context-btn.applied {
+		background: rgba(16, 185, 129, 0.1); /* Green tint */
+		border-color: var(--green-success);
+		color: var(--green-success);
 	}
 
-	.apply-btn svg {
-		width: 18px;
-		height: 18px;
+	.context-btn.applied:hover {
+		box-shadow: 0 0 15px var(--green-glow);
+	}
+
+	.btn-icon {
+		width: 16px;
+		height: 16px;
 	}
 
 	/* Toast */
