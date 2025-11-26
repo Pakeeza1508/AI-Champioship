@@ -137,6 +137,85 @@
 			showContextToast = false;
 		}, 2500);
 	}
+
+	// ... existing imports and variables ...
+
+	// NEW: Optimization Logic
+	async function optimizeDesign() {
+		if (!simResult || simResult.status === 'PASS' || !$aircraft.wings.model) return;
+
+		// 1. Calculate target Safety Factor (1.5)
+		const currentSF = simResult.safety_factor;
+		const targetSF = 1.55; // Aim slightly higher for safety
+		
+		// 2. Calculate required strength increase
+		// Stress is inversely proportional to Thickness^2 (roughly) for Section Modulus
+		// We need to increase thickness.
+		// Ratio = Target / Current
+		const ratio = targetSF / currentSF;
+		
+		// 3. Get current parameters
+		const currentParams = $aircraft.wings.model.parameters;
+		const currentThickness = currentParams.thickness;
+		
+		// 4. Calculate new thickness (Simple approximation: Thickness * sqrt(ratio))
+		// Since Z ~ Thickness^2, then Thickness ~ sqrt(Z)
+		let newThickness = currentThickness * Math.sqrt(ratio);
+		
+		// Cap it reasonably (max 25%)
+		if (newThickness > 25) newThickness = 25;
+		if (newThickness < currentThickness) newThickness = currentThickness + 2; // Minimum bump
+
+		// 5. Round to integer
+		newThickness = Math.floor(newThickness);
+
+		// 6. Apply the change
+		// We use the apiService to update just like the slider would
+		const newParams = { ...currentParams, thickness: newThickness };
+		
+		// Notify User
+		alert(`AI OPTIMIZATION:\nIncreasing Wing Thickness from ${currentThickness}% to ${newThickness}%\nto handle ${simResult.lift_force_kn} kN load.`);
+		
+		// 7. Trigger Update
+		// We need to find the ComponentEditor logic to update. 
+		// Since we are in +page.svelte, we can manually trigger the API update via the service.
+		isCompiling = true; // Show spinner
+		
+		try {
+			const response = await apiService.updateParameters(newParams);
+			if (response.success && response.model) {
+				// Update the store
+				// We need to import setComponentModel from stores if not already imported
+				// (Make sure setComponentModel is imported at the top!)
+				
+				// Force refresh the specific component in the store
+				// Note: In +page.svelte we need to access the store writer.
+				// The cleanest way is to just re-run the simulation after a short delay
+				// But first, we update the backend model.
+				
+				// A trick to update the UI:
+				// We will rely on the user re-running the sim, but the model IS updated.
+				// To update the UI visual, we need to update the 'aircraft' store.
+				
+				// IMPORTANT: Add this import at the top if missing:
+				// import { setComponentModel } from '$lib/stores/aircraftStore';
+				
+				setComponentModel('wings', response.model);
+				
+				// Reset sim result so they have to run it again to see the green PASS
+				simResult = null;
+				
+				// Show toast/alert
+				contextToastText = "Optimization Applied. Re-run simulation.";
+				showContextToast = true;
+				setTimeout(() => showContextToast = false, 3000);
+			}
+		} catch (e) {
+			console.error(e);
+		} finally {
+			isCompiling = false;
+		}
+	}
 </script>
 
 <main class="app-container">
@@ -451,7 +530,14 @@
 										<span class="value">{simResult.details.dynamic_pressure} <span class="unit">Pa</span></span>
 									</div>
 								</div>
-								
+								{#if simResult.status === 'FAIL'}
+									<button class="optimize-btn" on:click={optimizeDesign}>
+										<svg viewBox="0 0 24 24" fill="none" class="opt-icon">
+											<path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+										</svg>
+										<span>AI AUTO-OPTIMIZE DESIGN</span>
+									</button>
+								{/if}
 								<button class="reset-btn" on:click={() => simResult = null}>
 									RUN NEW SIMULATION
 								</button>
@@ -1610,5 +1696,33 @@
 		background: var(--blueprint-surface); 
 		color: var(--gray-100);
 		border-color: var(--gray-500);
+	}
+	.optimize-btn {
+		width: 100%;
+		padding: var(--space-3);
+		background: rgba(16, 185, 129, 0.1);
+		border: 1px solid var(--green-success);
+		color: var(--green-success);
+		font-size: 0.75rem;
+		font-weight: 800;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: var(--space-2);
+		margin-bottom: var(--space-3);
+		transition: all 0.2s;
+		box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+		animation: pulse-bright 2s infinite;
+	}
+
+	.optimize-btn:hover {
+		background: rgba(16, 185, 129, 0.2);
+		transform: translateY(-2px);
+	}
+
+	.opt-icon {
+		width: 16px;
+		height: 16px;
 	}
 </style>
