@@ -46,17 +46,19 @@ A full-stack web application for generating, modifying, and exporting 3D CAD mod
 
 1. **Clone and navigate to project**
 ```bash
-cd hacknation-nat
+cd futureCraft
 ```
 
 2. **Set up backend**
 ```bash
 cd backend
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate 
+ # On Windows: 
+ venv\Scripts\activate
 pip install -r requirements.txt
-cp .env.example .env
-# Add your OpenAI API key to .env
+
+# Add your GROQ API key to .env
 ```
 
 3. **Set up frontend**
@@ -97,24 +99,6 @@ Navigate to `http://localhost:5173`
 - `POST /api/images/upload` - Upload reference image
 - `GET /api/images/{id}` - Retrieve reference image
 
-## Development
-
-### Frontend Development
-```bash
-cd frontend
-npm run dev          # Start dev server
-npm run build        # Build for production
-npm run preview      # Preview production build
-npm run check        # Type checking
-```
-
-### Backend Development
-```bash
-cd backend
-uvicorn app.main:app --reload  # Start with hot reload
-pytest                         # Run tests
-```
-
 ## Architecture
 
 ### Text-to-3D Pipeline
@@ -148,7 +132,7 @@ MIT
 
 ## 🤝 Acknowledgements & Attribution
 
-**FutureCraft** is built upon the architectural foundation of [Original Project Name](URL_TO_ORIGINAL_REPO) by [Original Author Name].
+**FutureCraft** is built upon the architectural foundation of [Original Project Name](https://github.com/snowcodeer/AeroCraft) by [snowcodeer].
 
 We gratefully acknowledge their work in establishing the initial:
 *   Text-to-3D LLM integration pipeline.
