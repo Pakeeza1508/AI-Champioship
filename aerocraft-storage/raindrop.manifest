@@ -1,0 +1,4 @@
+application "futurecraft-storage" {
+  service "futurecraft-storage-service" {}
+  smartbucket "futurecraft-storage-smartbucket" {}
+  }

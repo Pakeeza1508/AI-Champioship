@@ -1,4 +1,4 @@
-# AeroCraft - AI-Powered Aerospace CAD Web Application
+# FutureCraft - AI-Powered Aerospace CAD Web Application
 
 A full-stack web application for generating, modifying, and exporting 3D CAD models of aerospace components using AI.
 - Demo video: https://youtu.be/xMromFDNgXw
@@ -58,7 +58,7 @@ source venv/bin/activate
  venv\Scripts\activate
 pip install -r requirements.txt
 
-# Add your GROQ API key to .env
+# Add your CEREBRAS API key to .env (get it from https://cloud.cerebras.ai)
 ```
 
 3. **Set up frontend**

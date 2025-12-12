@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RSA Demo (Safe Mode)</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --secondary: #db2777;
+            --bg: #f3f4f6;
+            --card-bg: #ffffff;
+            --text: #1f2937;
+            --success: #10b981;
+            --error: #ef4444;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            padding: 20px;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary);
+        }
+
+        /* Step Cards */
+        .step-card {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-left: 5px solid #ccc;
+            opacity: 0.6;
+            pointer-events: all;
+            /* Locked */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
+        }
+
+        .step-card.active {
+            opacity: 1;
+            pointer-events: all;
+            /* Unlocked */
+            border-left-color: var(--primary);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .step-badge {
+            background: var(--primary);
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .step-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .input-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .input-group {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #4338ca;
+        }
+
+        /* Keys Display */
+        .keys-container {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .key-box {
+            flex: 1;
+            font-family: monospace;
+        }
+
+        .key-label {
+            font-weight: bold;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        /* Result Boxes */
+        .result-box {
+            background: #fff;
+            border: 2px solid #e5e7eb;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            word-break: break-all;
+            font-family: monospace;
+            color: var(--primary);
+        }
+
+        /* Notifications */
+        .alert {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.error {
+            background: #fee2e2;
+            color: #b91c1c;
+            display: block;
+        }
+
+        .alert.success {
+            background: #d1fae5;
+            color: #065f46;
+            display: block;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>RSA Interactive Flow</h1>
+
+        <!-- JS Check Warning -->
+        <noscript>
+            <div
+                style="background:#fee2e2; color:#b91c1c; padding:15px; border-radius:6px; text-align:center; margin-bottom:20px;">
+                <strong>Javascript is disabled!</strong> This demo requires Javascript to perform the math.
+            </div>
+        </noscript>
+
+        <div id="status-msg" class="alert hidden"></div>
+
+        <!-- STEP 1 -->
+        <div class="step-card active" id="step1">
+            <div class="step-header">
+                <div class="step-badge">1</div>
+                <div class="step-title">Key Generation</div>
+            </div>
+            <p style="margin-top:0; color:#666;">Enter two different prime numbers (e.g., 17 and 23).</p>
+
+            <div class="input-row">
+                <div class="input-group">
+                    <label>Prime P</label>
+                    <input type="number" id="p" placeholder="e.g. 17">
+                </div>
+                <div class="input-group">
+                    <label>Prime Q</label>
+                    <input type="number" id="q" placeholder="e.g. 23">
+                </div>
+            </div>
+            <button id="btn-gen">Generate Keys</button>
+
+            <div id="keys-area" class="hidden">
+                <div class="keys-container">
+                    <div class="key-box">
+                        <span class="key-label" style="color:var(--primary)">Public Key (e, n)</span>
+                        <span id="pub-key-val" style="font-size:1.1rem; font-weight:bold;"></span>
+                    </div>
+                    <div class="key-box" style="border-left:1px solid #ddd; padding-left:15px;">
+                        <span class="key-label" style="color:var(--secondary)">Private Key (d, n)</span>
+                        <span id="priv-key-val" style="font-size:1.1rem; font-weight:bold;"></span>
+                    </div>
+                </div>
+                <div style="font-size:0.85rem; color:#666; margin-top:5px;">
+                    Calculations: n=<span id="calc-n"></span>, φ=<span id="calc-phi"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 2 -->
+        <div class="step-card" id="step2">
+            <div class="step-header">
+                <div class="step-badge">2</div>
+                <div class="step-title">Encryption</div>
+            </div>
+            <div class="input-group">
+                <label>Message to Encrypt</label>
+                <input type="text" id="plain-input" placeholder="Enter text...">
+            </div>
+            <br>
+            <button id="btn-encrypt">Encrypt</button>
+
+            <div id="cipher-area" class="hidden">
+                <div class="result-box">
+                    <strong>Ciphertext:</strong><br>
+                    <span id="cipher-result"></span>
+                </div>
+                <small style="color:#666;">Numbers generated from input characters</small>
+            </div>
+        </div>
+
+        <!-- STEP 3 -->
+        <div class="step-card" id="step3">
+            <div class="step-header">
+                <div class="step-badge">3</div>
+                <div class="step-title">Decryption</div>
+            </div>
+            <div class="input-group">
+                <label>Ciphertext (comma separated)</label>
+                <input type="text" id="cipher-input" placeholder="e.g. 123, 456...">
+            </div>
+            <br>
+            <button id="btn-decrypt">Decrypt</button>
+
+            <div id="decrypt-area" class="hidden">
+                <div class="result-box" style="border-color: var(--success); color: var(--success);">
+                    <strong>Decrypted Message:</strong><br>
+                    <span id="final-result" style="font-weight:bold; font-size:1.1rem;"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            // --- STATE ---
+            let keys = { n: null, e: null, d: null };
+
+            // --- UI ELEMENTS ---
+            const ui = {
+                p: document.getElementById('p'),
+                q: document.getElementById('q'),
+                btnGen: document.getElementById('btn-gen'),
+                keysArea: document.getElementById('keys-area'),
+                pubKey: document.getElementById('pub-key-val'),
+                privKey: document.getElementById('priv-key-val'),
+                calcN: document.getElementById('calc-n'),
+                calcPhi: document.getElementById('calc-phi'),
+                step2: document.getElementById('step2'),
+                plainIn: document.getElementById('plain-input'),
+                btnEnc: document.getElementById('btn-encrypt'),
+                cipherArea: document.getElementById('cipher-area'),
+                cipherRes: document.getElementById('cipher-result'),
+                step3: document.getElementById('step3'),
+                cipherIn: document.getElementById('cipher-input'),
+                btnDec: document.getElementById('btn-decrypt'),
+                decArea: document.getElementById('decrypt-area'),
+                finalRes: document.getElementById('final-result'),
+                status: document.getElementById('status-msg')
+            };
+
+            // --- MATH HELPERS (BigInt) ---
+            function gcd(a, b) {
+                while (b !== 0n) { let t = b; b = a % b; a = t; }
+                return a;
+            }
+
+            function modInverse(e, phi) {
+                let m0 = phi, t, q;
+                let x0 = 0n, x1 = 1n;
+                if (phi === 1n) return 0n;
+                while (e > 1n) {
+                    if (phi === 0n) return 0n; // Safety
+                    q = e / phi;
+                    t = phi; phi = e % phi; e = t;
+                    t = x0; x0 = x1 - q * x0; x1 = t;
+                }
+                if (x1 < 0n) x1 += m0;
+                return x1;
+            }
+
+            function modPow(base, exp, mod) {
+                let res = 1n;
+                base = base % mod;
+                while (exp > 0n) {
+                    if (exp % 2n === 1n) res = (res * base) % mod;
+                    exp = exp / 2n;
+                    base = (base * base) % mod;
+                }
+                return res;
+            }
+
+            function isPrime(num) {
+                if (num <= 1n) return false;
+                if (num <= 3n) return true;
+                if (num % 2n === 0n || num % 3n === 0n) return false;
+                for (let i = 5n; i * i <= num; i += 6n) {
+                    if (num % i === 0n || num % (i + 2n) === 0n) return false;
+                }
+                return true;
+            }
+
+            // --- ALERTS ---
+            function showMsg(msg, isError = true) {
+                ui.status.textContent = msg;
+                ui.status.className = isError ? 'alert error' : 'alert success';
+                // Auto hide after 5 seconds
+                setTimeout(() => { ui.status.className = 'alert hidden'; }, 5000);
+            }
+
+            // --- LOGIC: STEP 1 (GENERATE) ---
+            ui.btnGen.addEventListener('click', () => {
+                try {
+                    if (!ui.p.value || !ui.q.value) throw "Please enter both P and Q.";
+
+                    const p = BigInt(ui.p.value);
+                    const q = BigInt(ui.q.value);
+
+                    // Validation
+                    if (p === q) throw "P and Q must be different.";
+                    if (!isPrime(p)) throw "P is not prime.";
+                    if (!isPrime(q)) throw "Q is not prime.";
+
+                    const n = p * q;
+                    const phi = (p - 1n) * (q - 1n);
+
+                    // Find e
+                    let e = 3n;
+                    while (e < phi && gcd(e, phi) !== 1n) { e += 2n; }
+                    if (e >= phi) throw "Could not find a valid e (try larger primes).";
+
+                    // Find d
+                    const d = modInverse(e, phi);
+
+                    // Save State
+                    keys = { n, e, d };
+
+                    // Update UI
+                    ui.pubKey.textContent = { e=${ e }, n = ${ n }
+                };
+                ui.privKey.textContent = { d=${ d }, n = ${ n }
+            };
+            ui.calcN.textContent = n;
+            ui.calcPhi.textContent = phi;
+            ui.keysArea.classList.remove('hidden');
+
+            // Unlock Next Step
+            ui.step2.classList.add('active');
+
+            // Warning for small keys
+            if (n < 255n) showMsg("Note: 'n' is small. ASCII characters > n will not encrypt correctly.", true);
+            else showMsg("Keys Generated Successfully!", false);
+
+        } catch (err) {
+            showMsg(err);
+        }
+    });
+
+        // --- LOGIC: STEP 2 (ENCRYPT) ---
+        ui.btnEnc.addEventListener('click', () => {
+            try {
+                const msg = ui.plainIn.value;
+                if (!msg) throw "Please enter a message.";
+                if (keys.n === null) throw "Generate keys first.";
+
+                let cipherArr = [];
+                for (let i = 0; i < msg.length; i++) {
+                    const charCode = BigInt(msg.charCodeAt(i));
+                    if (charCode >= keys.n) throw Character '${msg[i]}' is too big for n = ${ keys.n }.Use larger primes.;
+                    const c = modPow(charCode, keys.e, keys.n);
+                    cipherArr.push(c);
+                }
+
+                const cipherStr = cipherArr.join(', ');
+                ui.cipherRes.textContent = cipherStr;
+                ui.cipherArea.classList.remove('hidden');
+
+                // Auto fill next step
+                ui.cipherIn.value = cipherStr;
+                ui.step3.classList.add('active');
+
+            } catch (err) {
+                showMsg(err);
+            }
+        });
+
+        // --- LOGIC: STEP 3 (DECRYPT) ---
+        ui.btnDec.addEventListener('click', () => {
+            try {
+                const cipherStr = ui.cipherIn.value;
+                if (!cipherStr) throw "Enter ciphertext.";
+
+                const arr = cipherStr.split(',').map(s => s.trim()).filter(s => s);
+                let plain = "";
+
+                for (let num of arr) {
+                    const c = BigInt(num);
+                    const m = modPow(c, keys.d, keys.n);
+                    plain += String.fromCharCode(Number(m));
+                }
+
+                ui.finalRes.textContent = plain;
+                ui.decArea.classList.remove('hidden');
+
+            } catch (err) {
+                showMsg("Decryption failed. Check your input format.");
+            }
+        });
+
+});
+    </script>
+</body>
+
+</html>

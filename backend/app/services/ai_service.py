@@ -1,17 +1,20 @@
 import json
 import sys
-# NOTE: Groq client is synchronous; add timing logs around network calls to diagnose slowness
-from groq import Groq
+import os
 import time
-# from openai import OpenAI
+from cerebras.cloud.sdk import Cerebras
 from app.core import settings
 from app.models import AeroParameters
 
 
 class AIService:
     def __init__(self):
-        # self.client = OpenAI(api_key=settings.openai_api_key)
-        self.client = Groq(api_key=settings.groq_api_key)
+        # Initialize Cerebras client with API key from environment or settings
+        self.client = Cerebras(
+            api_key=os.environ.get("CEREBRAS_API_KEY") or settings.cerebras_api_key
+        )
+        # Cerebras is incredibly fast with low latency
+        self.model = settings.cerebras_model
     async def extract_parameters_from_text(self, prompt: str) -> AeroParameters:
         """
         Use GPT-4 to extract structured aerospace parameters from natural language.
@@ -116,19 +119,32 @@ ONLY return valid JSON matching these exact field names."""
 
         try:
             start = time.time()
-            print("[AI] extract_parameters_from_text: calling Groq API...", file=sys.stderr)
-            response = self.client.chat.completions.create(
-                # model=settings.openai_model,
-                model=settings.groq_model,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": prompt}
-                ],
-                temperature=0.3,
-                response_format={"type": "json_object"}
-            )
+            print("[AI] extract_parameters_from_text: calling Cerebras API...", file=sys.stderr)
+            
+            # Try with response_format first, fallback without it if unsupported
+            try:
+                response = self.client.chat.completions.create(
+                    model=self.model,
+                    messages=[
+                        {"role": "system", "content": system_prompt + "\n\nIMPORTANT: Return ONLY valid JSON, nothing else."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    temperature=0.3,
+                    response_format={"type": "json_object"}
+                )
+            except Exception as e:
+                print(f"[AI] response_format not supported, retrying without it: {e}", file=sys.stderr)
+                response = self.client.chat.completions.create(
+                    model=self.model,
+                    messages=[
+                        {"role": "system", "content": system_prompt + "\n\nIMPORTANT: Return ONLY valid JSON, nothing else."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    temperature=0.3
+                )
+            
             elapsed = time.time() - start
-            print(f"[AI] extract_parameters_from_text: Groq API returned in {elapsed:.2f}s", file=sys.stderr)
+            print(f"[AI] extract_parameters_from_text: Cerebras API returned in {elapsed:.2f}s", file=sys.stderr)
 
             content = response.choices[0].message.content
             if not content:
@@ -216,12 +232,11 @@ Return as JSON:
   "fuselage": { parameters... },
   "engines": { parameters... }
 }"""
-        print("--- DEBUG: BEFORE calling Groq API ---") # <-- ADD THIS LINE
         start = time.time()
 
         try:
             response = self.client.chat.completions.create(
-                model=settings.groq_model,
+                model=self.model,
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": prompt}
@@ -230,7 +245,7 @@ Return as JSON:
                 response_format={"type": "json_object"}
             )
             elapsed = time.time() - start
-            print(f"--- DEBUG: AFTER calling Groq API (took {elapsed:.2f}s) ---") # <-- ADD THIS LINE
+            print(f"[AI] generate_complete_aircraft: Cerebras API returned in {elapsed:.2f}s", file=sys.stderr)
 
             content = response.choices[0].message.content
             if not content:
@@ -325,9 +340,9 @@ Return JSON with this exact structure:
 
         try:
             start = time.time()
-            print("[AI] calculate_intelligent_assembly: calling Groq API...", file=sys.stderr)
+            print("[AI] calculate_intelligent_assembly: calling Cerebras API...", file=sys.stderr)
             response = self.client.chat.completions.create(
-                model=settings.groq_model,
+                model=self.model,
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt}
@@ -336,7 +351,7 @@ Return JSON with this exact structure:
                 response_format={"type": "json_object"}
             )
             elapsed = time.time() - start
-            print(f"[AI] calculate_intelligent_assembly: Groq API returned in {elapsed:.2f}s", file=sys.stderr)
+            print(f"[AI] calculate_intelligent_assembly: Cerebras API returned in {elapsed:.2f}s", file=sys.stderr)
 
             content = response.choices[0].message.content
             if not content:
@@ -470,7 +485,7 @@ Return the edit instruction as JSON."""
 
         try:
             response = self.client.chat.completions.create(
-                model=settings.groq_model,
+                model=self.model,
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt}
@@ -481,7 +496,7 @@ Return the edit instruction as JSON."""
 
             content = response.choices[0].message.content
             if not content:
-                raise ValueError("Empty response from OpenAI for edit command")
+                raise ValueError("Empty response from Cerebras for edit command")
 
             edit_instruction = json.loads(content)
             print(f"AI parsed edit command: {edit_instruction}")

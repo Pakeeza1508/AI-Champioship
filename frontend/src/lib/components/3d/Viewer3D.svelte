@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, createEventDispatcher } from 'svelte';
 	import * as THREE from 'three';
 	import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 	import { aircraft, activeComponent, allComponents } from '$lib/stores/aircraftStore';
 
+	const dispatch = createEventDispatcher();
 	export let viewMode: 'edit' | 'assembly' = 'edit';
 
 	let container: HTMLDivElement;
@@ -103,6 +104,13 @@
 		if (controls) controls.update();
 		if (renderer && scene && camera) {
 			renderer.render(scene, camera);
+			
+			// Emit camera position to parent component
+			dispatch('cameraUpdate', {
+				x: camera.position.x,
+				y: camera.position.y,
+				z: camera.position.z
+			});
 		}
 	}
 

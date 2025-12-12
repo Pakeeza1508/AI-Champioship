@@ -9,7 +9,7 @@ from app.api import generation_router, export_router, images_router, simulation_
 
 # Create FastAPI app
 app = FastAPI(
-    title="AeroCraft API",
+    title="FutureCraft API",
     description="AI-Powered Aerospace CAD Web Application",
     version="0.1.0"
 )

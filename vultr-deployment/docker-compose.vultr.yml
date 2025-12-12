@@ -1,0 +1,13 @@
+version: '3.8'
+services:
+  aerocraft-app:
+    build: ..
+    container_name: aerocraft_vultr_instance
+    restart: always
+    ports:
+      - "80:8000"
+    environment:
+      - ENV=production
+      - PLATFORM=vultr_cloud_compute
+    volumes:
+      - ../uploads:/app/uploads

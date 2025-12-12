@@ -24,6 +24,9 @@
 	let showContextToast = false;
 	let contextToastText = '';
 
+	// Camera position tracking (updated in real-time by Viewer3D)
+	let cameraPosition = { x: 3, y: 2, z: 3 };
+
 	type ViewMode = 'edit' | 'assembly';
 	let viewMode: ViewMode = 'edit';
 
@@ -573,21 +576,21 @@
 				<div class="viewport-coords">
 					<div class="coord-item">
 						<span class="coord-label">X</span>
-						<span class="coord-value">0.00</span>
+						<span class="coord-value">{cameraPosition.x.toFixed(2)}</span>
 					</div>
 					<div class="coord-item">
 						<span class="coord-label">Y</span>
-						<span class="coord-value">0.00</span>
+						<span class="coord-value">{cameraPosition.y.toFixed(2)}</span>
 					</div>
 					<div class="coord-item">
 						<span class="coord-label">Z</span>
-						<span class="coord-value">0.00</span>
+						<span class="coord-value">{cameraPosition.z.toFixed(2)}</span>
 					</div>
 				</div>
 			</div>
 
 			<div class="viewport-canvas">
-				<Viewer3D {viewMode} />
+				<Viewer3D {viewMode} on:cameraUpdate={(e) => cameraPosition = e.detail} />
 
 				<!-- Corner Brackets (CAD aesthetic) -->
 				<div class="viewport-brackets">

@@ -1,8 +1,8 @@
-# AeroCraft Technical Blueprint Design System
+# FutureCraft Technical Blueprint Design System
 
 ## Design Philosophy
 
-AeroCraft's interface is inspired by **precision aerospace engineering**, **technical CAD software**, and **blueprint aesthetics**. The design creates a professional, information-dense environment that feels like mission-critical aerospace tooling while maintaining excellent usability.
+FutureCraft's interface is inspired by **precision aerospace engineering**, **technical CAD software**, and **blueprint aesthetics**. The design creates a professional, information-dense environment that feels like mission-critical aerospace tooling while maintaining excellent usability.
 
 ## Visual Identity
 

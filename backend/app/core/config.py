@@ -3,11 +3,9 @@ from typing import List
 
 
 class Settings(BaseSettings):
-    # OpenAI
-    # openai_api_key: str
-    # openai_model: str = "gpt-4.1"
-    groq_api_key: str  # <-- Changed this line
-    groq_model: str = "openai/gpt-oss-20b"
+    # Cerebras
+    cerebras_api_key: str
+    cerebras_model: str = "zai-glm-4.6"  # Cerebras model
 
     # Server
     host: str = "0.0.0.0"

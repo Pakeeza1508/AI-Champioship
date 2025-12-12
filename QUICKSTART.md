@@ -1,6 +1,6 @@
-# AeroCraft - Quick Start Guide
+# FutureCraft - Quick Start Guide
 
-Get up and running with AeroCraft in 5 minutes!
+Get up and running with FutureCraft in 5 minutes!
 
 ## Prerequisites
 
@@ -65,7 +65,7 @@ Frontend will be running at: **http://localhost:5173**
 ## Step 4: Try It Out!
 
 1. Open your browser to **http://localhost:5173**
-2. You'll see the AeroCraft interface with:
+2. You'll see the FutureCraft interface with:
    - Left panel: Text input, parameters, reference images, export
    - Center: 3D viewer (with a placeholder wing)
 

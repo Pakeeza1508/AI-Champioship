@@ -6,7 +6,7 @@ pydantic>=2.5.3
 pydantic-settings>=2.1.0
 
 # AI/ML
-openai>=1.10.0
+cerebras-cloud-sdk>=0.1.0
 python-dotenv>=1.0.0
 
 # 3D geometry and CAD
@@ -26,6 +26,5 @@ aiofiles>=23.2.0
 
 # CORS is built into FastAPI - no additional package needed
 
-groq
 pycalculix
 python-docx
