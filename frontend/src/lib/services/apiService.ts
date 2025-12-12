@@ -1,6 +1,7 @@
 import type { GenerateResponse, AeroParameters, ExportFormat, Model3D } from '$lib/types/model';
 
-const API_BASE = '/api';
+const API_BASE = 'https://pakeezakhalid-ai-championship.hf.space/api';
+// const API_BASE = '/api';
 
 // Helper function to convert backend snake_case to frontend camelCase
 function mapBackendToFrontend(backendData: any): Model3D {
