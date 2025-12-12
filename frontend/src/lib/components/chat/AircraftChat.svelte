@@ -81,7 +81,8 @@
 			}
 
 			// Generation mode (new aircraft or edit failed)
-			const response = await fetch('/api/generate/from-chat', {
+		// const response = await fetch'/api/generate/from-chat', {
+			const response = await fetch('https://pakeezakhalid-ai-championship.hf.space/api/generate/from-chat', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ prompt: userMessage })
