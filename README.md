@@ -1,6 +1,11 @@
-# FutureCraft - AI-Powered Aerospace CAD Web Application
+# ✈️ FutureCraft - AI-Powered Aerospace CAD Web Application
 
-A full-stack web application for generating, modifying, and exporting 3D CAD models of aerospace components using AI.
+
+
+A full-stack web application that generates, optimizes, and exports 3D CAD models of aerospace components using AI and real-world physics simulation.
+
+**🎯 Try it live:** [FutureCraft App](https://ai-champioship.vercel.app/)  
+
 
 ## Tech Stack
 
@@ -11,33 +16,41 @@ A full-stack web application for generating, modifying, and exporting 3D CAD mod
 - **TypeScript** - Type-safe development
 
 ### Backend
-- **Python 3.11+** - Backend runtime
+- **Python 3.10+** - Backend runtime
 - **FastAPI** - High-performance async API framework
-- **OpenAI API** - GPT-4 for parameter extraction, DALL-E for image processing
+- **Cerebras Cloud SDK** - Ultra-fast LLM inference for parameter extraction
 - **Trimesh** - 3D mesh processing and STL export
-- **pythonOCC** - OpenCascade wrapper for STEP/IGES export
+- **NumPy/SciPy** - Physics calculations and structural analysis
+
+### Infrastructure & Cloud
+- **Vercel** - Frontend hosting and deployment
+- **Hugging Face Spaces** - Backend API hosting (Docker)
+- **Vultr** - Cloud compute infrastructure
+- **Raindrop** - Object storage for CAD files and assets
 
 
-## Features
+## ✨ Features
 
-### MVP (Phase 1)
-- ✅ Text-to-3D generation (natural language → parametric models)
-- ✅ Image reference viewer (upload and display reference images)
-- ✅ Parametric controls (real-time dimension editing)
-- ✅ CAD export (STL, STEP, IGES formats)
+### Core Capabilities
+- 🤖 **AI-Powered Design**: Natural language to parametric 3D models using Cerebras LLM
+- 🎨 **Real-Time 3D Viewer**: Interactive WebGL-based component visualization
+- 🔧 **Parametric Controls**: Live dimension editing with instant visual feedback
+- 🧪 **Physics Simulation**: Structural stress analysis, safety factors, and material properties
+- 📊 **Materials Database**: Al7075, Titanium, Carbon Fiber with real-world properties
+- 🌍 **Mission Profiles**: Altitude/speed simulation with atmospheric physics
+- 💬 **AI Chat Assistant**: Conversational interface for design modifications
+- 📦 **CAD Export**: STL format for 3D printing and manufacturing
+- 🛡️ **Auto-Optimization**: AI agent corrects designs to meet safety standards
 
-### Future Enhancements
-- Image-to-3D reconstruction
-- Version control and revision history
-- Collaborative editing
-- Cloud storage integration
-- Advanced aerodynamic analysis
-- Multi-part assemblies
+### Supported Components
+- Wings (swept, delta, straight)
+- Fuselage (commercial, fighter, cargo)
+- Engines (jet, turboprop)
 
 ## Quick Start
-
-### Prerequisites
-- Node.js 18+ and npm/pnpm
+20+ and npm
+- Python 3.10+
+- Cerebras API key ([Get one free here](https://cloud.cerebras.ai))d npm/pnpm
 - Python 3.11+
 - OpenAI API key
 
@@ -87,12 +100,13 @@ Navigate to `http://localhost:5173`
 ## Architecture
 
 ### Text-to-3D Pipeline
-1. User enters text description (e.g., "delta wing with 45° sweep, 2m span")
-2. FastAPI sends to OpenAI GPT-4 with aerospace engineering prompt
-3. GPT-4 extracts structured parameters (wing type, dimensions, angles)
-4. Geometry service generates 3D mesh using parametric templates
-5. Frontend receives mesh data and renders with Threlte
-6. User can adjust parameters in real-time
+1. User enters text description (e.g., "Create a Boeing 747 commercial airliner")
+2. FastAPI routes request to Cerebras LLM with aerospace engineering context
+3. AI extracts structured parameters (wing span, sweep angle, materials, etc.)
+4. Geometry service generates parametric 3D mesh using Trimesh
+5. Physics engine calculates volume, stress, and safety factors
+6. Frontend receives mesh + metadata and renders with Threlte/Three.js
+7. User adjusts parameters via sliders or chat with instant visual updates
 
 ### Data Flow
 ```
@@ -110,30 +124,36 @@ Export Service → CAD Files
     ↓
 Frontend (Threlte) → 3D Viewer
 ```
+🎯 Project Status
 
-## License
-
-MIT
-
-## 🤝 Acknowledgements & Attribution
-
-**FutureCraft** is built upon the architectural foundation of [Original Project Name](https://github.com/snowcodeer/AeroCraft) by [snowcodeer].
+**Deployed:**
+- Frontend: Vercel (CDN)
+- Backend: Hugging Face Spaces (Docker container)
+- Infrastructure: Vultr (cloud compute)
+- Storage: Raindrop (object storage)
+AeroCraft](https://github.com/snowcodeer/AeroCraft) by snowcodeer.
 
 We gratefully acknowledge their work in establishing the initial:
-*   Text-to-3D LLM integration pipeline.
-*   Base parametric mesh generation logic.
-*   Three.js viewer setup.
+- Text-to-3D LLM integration pipeline
+- Base parametric mesh generation logic
+- Three.js viewer setup
 
+All original code remains credited under their MIT license
+## 📄 What's New in FutureCraft
 
-## 🚀 Hackathon Implementation Details
+This project significantly extends the original open-source prototype with production-ready features:
 
-This project extends an existing open-source prototype. Below is a breakdown of the original codebase versus our engineering contributions for this hackathon:
+| Feature Category | Original Base | **FutureCraft Enhancement** |
+|---|---|---|
+| **Physics Engine** | None (visual only) | ✅ Real structural simulation with beam theory, stress analysis, and safety factors |
+| **Materials System** | Generic mesh | ✅ Engineering materials database (Al7075, Ti-6Al-4V, CFRP) with real density/strength |
+| **Mission Profiles** | None | ✅ Altitude/speed environment simulation with atmospheric physics and Mach calculations |
+| **AI Intelligence** | Basic text-to-shape | ✅ AI optimization agent that auto-corrects unsafe designs |
+| **Backend** | Prototype with bugs | ✅ Production FastAPI with async fixes, O(1) volume calc, proper error handling |
+| **Frontend** | Basic viewer | ✅ Professional UI with Mission Control, parametric sliders, and chat interface |
+| **Deployment** | Local only | ✅ Cloud deployment (Vercel + Hugging Face) with CI/CD |
+| **LLM Provider** | OpenAI (paid) | ✅ Cerebras Cloud (free tier, 10x faster inference) |
 
-| Feature Category | Original Base Project | **New in FutureCraft (Our Work)** |
-| :--- | :--- | :--- |
-| **Physics Engine** | None (Visual only) | **Added Structural Simulation** (Beam Theory, Stress Analysis, Safety Factors). |
-| **Materials** | None (Generic mesh) | **Added Material Database** (Al7075, Titanium, Carbon Fiber) with real density/strength properties. |
-| **Environment** | None | **Added Mission Profile** (Altitude/Speed sliders, Atmospheric Physics, Mach calculation). |
-| **Intelligence** | Text-to-Shape | **Added AI Optimization Agent** (Auto-corrects failed designs to meet safety standards). |
-| **Assembly** | Basic Positioning | **Fixed & Enhanced** (Solved compilation bugs, added intelligent positioning logic). |
-| **Architecture** | Async Logic Errors | **Refactored Backend** (Fixed async/await bugs, optimized volume calculation for O(1) performance). |
+---
+
+**Built with ❤️ for aerospace engineering and AI innovation**
