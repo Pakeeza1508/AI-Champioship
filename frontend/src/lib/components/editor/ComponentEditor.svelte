@@ -143,21 +143,10 @@
     
     // Calculate weight based on Backend Volume * Material Density
     // Model volume is in m³, Density in kg/m³
-    $: volume = model?.metadata?.volume || 0; 
-	const STRUCTURAL_FILL_FACTOR = 0.25; 
-
-// ... inside the component
-$: currentMaterialId = $componentMaterials[componentType];
-$: currentMaterial = MATERIALS.find(m => m.id === currentMaterialId) || MATERIALS[0];
-
-// Get raw volume
-$: rawVolume = model?.metadata?.volume || 0;
-
-// Apply the factor to get "Effective Volume"
-$: effectiveVolume = rawVolume * STRUCTURAL_FILL_FACTOR;
-
-// Calculate final weight
-$: weight = effectiveVolume * currentMaterial.density;
+	const STRUCTURAL_FILL_FACTOR = 0.25;
+	$: rawVolume = model?.metadata?.volume || 0;
+	$: effectiveVolume = rawVolume * STRUCTURAL_FILL_FACTOR;
+	$: weight = effectiveVolume * currentMaterial.density;
     
     function handleMaterialChange(event: Event) {
         const select = event.target as HTMLSelectElement;
