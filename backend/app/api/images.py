@@ -12,7 +12,7 @@ router = APIRouter(prefix="/images", tags=["images"])
 # Ensure upload directory exists
 UPLOAD_DIR = Path(settings.upload_dir)
 UPLOAD_DIR.mkdir(exist_ok=True)
-
+# s3_client = boto3.client(..., endpoint_url=os.getenv('RAINDROP_ENDPOINT'))
 
 @router.post("/upload", response_model=ImageUploadResponse)
 async def upload_image(file: UploadFile = File(...)):
