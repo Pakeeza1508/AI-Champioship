@@ -12,6 +12,7 @@
 		allComponentsComplete,
 		compiledAircraft,
 		isCompiling,
+		setComponentModel,
 		type ComponentType
 	} from '$lib/stores/aircraftStore';
 	import { apiService } from '$lib/services/apiService';
@@ -182,7 +183,7 @@
 		// 7. Trigger Update
 		// We need to find the ComponentEditor logic to update. 
 		// Since we are in +page.svelte, we can manually trigger the API update via the service.
-		isCompiling = true; // Show spinner
+		isCompiling.set(true); // Show spinner
 		
 		try {
 			const response = await apiService.updateParameters(newParams);
@@ -216,7 +217,7 @@
 		} catch (e) {
 			console.error(e);
 		} finally {
-			isCompiling = false;
+			isCompiling.set(false);
 		}
 	}
 </script>
